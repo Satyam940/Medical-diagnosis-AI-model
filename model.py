@@ -7,6 +7,7 @@ import random
 
 # Page config
 st.set_page_config(page_title="Disease Predictor", page_icon="🩺")
+print("TEST")
 
 
 # CSS styling
