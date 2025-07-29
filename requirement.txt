@@ -1,5 +1,5 @@
-streamlit
-joblib
-pandas
-numpy
-g4f
+streamlit==1.47.1
+joblib==1.5.1
+numpy==2.2.4
+g4f==0.5.7.6
+pandas==2.3.1
