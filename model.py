@@ -1,14 +1,18 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import pyttsx3
+# import pyttsx3
 import numpy as np 
 import random
+from g4f.client import Client
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+client = Client()
 
 # Page config
 st.set_page_config(page_title="Disease Predictor", page_icon="🩺")
 print("TEST")
-
 
 # CSS styling
 st.markdown("""
@@ -71,16 +75,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Load model
-model = joblib.load("15mil - 98.joblib")
+# model = joblib.load("15mil - 98.joblib")
 
 # Text-to-speech
-def speak(user_input):
-    engine = pyttsx3.init()
-    voices = engine.getProperty("voices")
-    engine.setProperty('rate', 100)
-    engine.setProperty('voice', voices[1].id)
-    engine.say(user_input)
-    engine.runAndWait()
+# def speak(user_input):
+#     engine = pyttsx3.init()
+#     voices = engine.getProperty("voices")
+#     engine.setProperty('rate', 100)
+#     engine.setProperty('voice', voices[1].id)
+#     engine.say(user_input)
+#     engine.runAndWait()
 
 # Symptoms list
 symptoms = [
@@ -170,15 +174,28 @@ symptoms = [
 # User Input: Symptom selection
 st.markdown("### Select the symptoms you are experiencing:")
 selected_symptoms = st.multiselect("", symptoms)
-a  = ",".join(selected_symptoms)
-print(a)
+b = ",".join(selected_symptoms)
+print("*********************",b)
+print(type(b))
+text_symptoms =  st.text_area("", "",)
+response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages =  [  
+            {'role':'system','content': 'You are the professional translator. person will come and tell their symptoms. You have to convert it back to medical symptom names  for example, "ulti" to "vomiting" and return it in the form of a string and also correct the spelling  and most important thing just give me the translated medical text only nothing else and just give me one space after giveing the text .'},
+            {'role':'user','content': text_symptoms},  
+            {'role':'assistant','content': ' you only have to transalate the symptoms not need to describe and dont give any suggestion or step and precaution and ingore the text that are not related to the some symtoms donot need to process that text  if i enter nothing then ingore dont ned to do anything '},
+            ]
+
+        )
 
 
-# Prediction button
-if st.button("Predict Disease"):
-    if not selected_symptoms:
-        st.warning("⚠️ Please select at least one symptom.")
-    try:
+a  =response.choices[0].message.content
+
+final_response = a+b
+print(type(final_response))
+print("******************...........................................................888888888888888888",final_response)
+
+try:
    
         model_data = joblib.load('disease_predictor_model.pkl') 
         
@@ -190,14 +207,24 @@ if st.button("Predict Disease"):
         print("Model loaded successfully!")
         model_works = True 
     
-    except:
+except:
         model_works = False
+# a  = ",".join(selected_symptoms)
+# print(a)
+
+
+# Prediction button
+if st.button("Predict Disease"):
+    if not selected_symptoms:
+        st.warning("⚠️ Please select at least one symptom.")
+
 
     if model_works:
         try:
             
-            clean_input = a.lower().strip()
-            print("***********",clean_input)
+            clean_input = final_response.lower().strip()
+            print("clean_input",clean_input)
+            print("***********",type(clean_input))
             input_numbers = vectorizer.transform([clean_input])
             # print("*************",input_numbers)
             
@@ -205,7 +232,7 @@ if st.button("Predict Disease"):
             probabilities = model.predict_proba(input_numbers)[0]
             # print("*************",probabilities)
             top_3_indices = np.argsort(probabilities)[-3:][::-1]         
-            print("**********AI Model Predictions:*********bp")
+            # print("**********AI Model Predictions:*********bp")
             
             for i in range(1, 4):
                 idx = top_3_indices[i - 1]
