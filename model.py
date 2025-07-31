@@ -199,6 +199,7 @@ except:
 if st.button("Predict Disease"):
     if not selected_symptoms and not text_symptoms.strip():
         st.warning("⚠️ Please either select symptoms from the list or describe them in the text box.")
+        st.stop()
     else:
         # Only call translation if text_symptoms is not empty
         a = ""
