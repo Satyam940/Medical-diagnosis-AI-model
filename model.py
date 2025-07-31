@@ -160,7 +160,12 @@ st.markdown("### Select the symptoms you are experiencing:")
 selected_symptoms = st.multiselect("", symptoms)
 b = ",".join(selected_symptoms)
 
-text_symptoms =  st.text_area("", "",)     #translator
+
+text_symptoms = st.text_area(
+    "Or describe your symptoms in your own words (optional):",
+    placeholder="Mention your another symptoms"
+)
+    #translator
 response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages =  [  
@@ -195,8 +200,24 @@ except:
 
 # Prediction button
 if st.button("Predict Disease"):
-    if not selected_symptoms:
-        st.warning("⚠️ Please select at least one symptom.")
+    if not selected_symptoms and not text_symptoms.strip():
+        st.warning("⚠️ Please either select symptoms from the list or describe them in the text box.")
+    else:
+        # Only call translation if text_symptoms is not empty
+        a = ""
+        if text_symptoms.strip():
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[  
+                    {'role': 'system', 'content': 'You are the professional translator. Person will tell their symptoms. You have to convert them back to proper medical symptom names like "ulti" → "vomiting". Return only the translated string with a space at the end.'},
+                    {'role': 'user', 'content': text_symptoms},  
+                    {'role': 'assistant', 'content': 'Only translate relevant symptoms. Ignore unrelated text. If input is empty, do nothing.'},
+                ]
+            )
+            a = response.choices[0].message.content
+
+        final_response = a + ",".join(selected_symptoms)
+
 
 
 
@@ -236,5 +257,8 @@ if st.button("Predict Disease"):
 
         except Exception as error:
             print(f" model error: {error}")
+            
+
+
             
 
