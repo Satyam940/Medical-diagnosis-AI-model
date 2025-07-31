@@ -1,6 +1,6 @@
 import streamlit as st
 import joblib
-import pandas as pd
+# import pandas as pd
 # import pyttsx
 import numpy as np 
 import random
