@@ -1,8 +1,7 @@
 import streamlit as st
 import joblib
-# import pandas as pd
-# import pyttsx
 import numpy as np 
+
 import random
 from g4f.client import Client
 import warnings
@@ -74,19 +73,6 @@ st.markdown("""
     </marquee>
 """, unsafe_allow_html=True)
 
-# Load model
-# model = joblib.load("15mil - 98.joblib")
-
-# Text-to-speech
-# def speak(user_input):
-#     engine = pyttsx3.init()
-#     voices = engine.getProperty("voices")
-#     engine.setProperty('rate', 100)
-#     engine.setProperty('voice', voices[1].id)
-#     engine.say(user_input)
-#     engine.runAndWait()
-
-# Symptoms list
 symptoms = [
     'runny nose', 'sneezing', 'sore throat', 'cough', 'mild fever', 'congestion',
     'watery eyes', 'fatigue', 'body aches', 'stuffy nose', 'high fever',
@@ -175,8 +161,7 @@ symptoms = [
 st.markdown("### Select the symptoms you are experiencing:")
 selected_symptoms = st.multiselect("", symptoms)
 b = ",".join(selected_symptoms)
-print("*********************",b)
-print(type(b))
+
 text_symptoms =  st.text_area("", "",)
 response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -193,7 +178,7 @@ a  =response.choices[0].message.content
 
 final_response = a+b
 print(type(final_response))
-print("******************...........................................................888888888888888888",final_response)
+
 
 try:
    
@@ -201,16 +186,14 @@ try:
         
         model = model_data['model'] 
         vectorizer = model_data['vectorizer'] 
-        # print("vector", vectorizer) 
+     
         label_encoder = model_data['label_encoder'] 
-        # print("lable",model_data['label_encoder'] )
+       
         print("Model loaded successfully!")
         model_works = True 
     
 except:
         model_works = False
-# a  = ",".join(selected_symptoms)
-# print(a)
 
 
 # Prediction button
@@ -219,28 +202,28 @@ if st.button("Predict Disease"):
         st.warning("⚠️ Please select at least one symptom.")
 
 
+
+
+
+
     if model_works:
         try:
             
             clean_input = final_response.lower().strip()
-            print("clean_input",clean_input)
-            print("***********",type(clean_input))
-            input_numbers = vectorizer.transform([clean_input])
-            # print("*************",input_numbers)
-            
+            input_numbers = vectorizer.transform([clean_input])         
             
             probabilities = model.predict_proba(input_numbers)[0]
-            # print("*************",probabilities)
+            
             top_3_indices = np.argsort(probabilities)[-3:][::-1]         
-            # print("**********AI Model Predictions:*********bp")
+           
             
             for i in range(1, 4):
                 idx = top_3_indices[i - 1]
                 name = label_encoder.inverse_transform([idx])[0]
-                # print ("********", name )
+              
                 confidence = probabilities[idx] * 100
                 try : 
-                    if probabilities[top_3_indices[0]] * 100 <=8:
+                    if probabilities[top_3_indices[0]] * 100 <=10:
                         disease = ["flu" , "Common cold", "Normal Fever"]
                         pick = random.randint(0,2)
                         
@@ -257,6 +240,4 @@ if st.button("Predict Disease"):
         except Exception as error:
             print(f" model error: {error}")
             
-           
-            # print(best_confidence)           
-                
+
