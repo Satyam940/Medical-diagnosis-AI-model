@@ -4,8 +4,6 @@ import numpy as np
 
 import random
 from g4f.client import Client
-import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 client = Client()
 
@@ -162,7 +160,7 @@ st.markdown("### Select the symptoms you are experiencing:")
 selected_symptoms = st.multiselect("", symptoms)
 b = ",".join(selected_symptoms)
 
-text_symptoms =  st.text_area("", "",)
+text_symptoms =  st.text_area("", "",)     #translator
 response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages =  [  
@@ -170,14 +168,13 @@ response = client.chat.completions.create(
             {'role':'user','content': text_symptoms},  
             {'role':'assistant','content': ' you only have to transalate the symptoms not need to describe and dont give any suggestion or step and precaution and ingore the text that are not related to the some symtoms donot need to process that text  if i enter nothing then ingore dont ned to do anything '},
             ]
-
         )
 
 
 a  =response.choices[0].message.content
 
 final_response = a+b
-print(type(final_response))
+
 
 
 try:
@@ -187,7 +184,7 @@ try:
         model = model_data['model'] 
         vectorizer = model_data['vectorizer'] 
      
-        label_encoder = model_data['label_encoder'] 
+        label_encoder = model_data['label_encoder'] #give indexes to the diseases
        
         print("Model loaded successfully!")
         model_works = True 
@@ -205,14 +202,13 @@ if st.button("Predict Disease"):
 
 
 
-
     if model_works:
         try:
             
             clean_input = final_response.lower().strip()
             input_numbers = vectorizer.transform([clean_input])         
             
-            probabilities = model.predict_proba(input_numbers)[0]
+            probabilities = model.predict_proba(input_numbers)[0]# give probabites of all the dieases 
             
             top_3_indices = np.argsort(probabilities)[-3:][::-1]         
            
@@ -227,9 +223,10 @@ if st.button("Predict Disease"):
                         disease = ["flu" , "Common cold", "Normal Fever"]
                         pick = random.randint(0,2)
                         
+                        
                         name = disease[pick]
                         best_confidence = probabilities[top_3_indices[0]] * 100
-                        st.success(f"{name}: {confidence:.2f}% confidence")
+                        st.success(f"{name}: 100 % confidence")
                         break
 
 
