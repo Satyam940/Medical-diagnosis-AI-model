@@ -218,11 +218,6 @@ if st.button("Predict Disease"):
 
         final_response = a + ",".join(selected_symptoms)
 
-
-
-
-
-
     if model_works:
         try:
             
