@@ -1,7 +1,7 @@
 import streamlit as st
 import joblib
 import pandas as pd
-# import pyttsx3
+# import pyttsx
 import numpy as np 
 import random
 from g4f.client import Client
