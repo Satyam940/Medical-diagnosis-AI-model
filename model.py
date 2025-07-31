@@ -161,10 +161,7 @@ selected_symptoms = st.multiselect("", symptoms)
 b = ",".join(selected_symptoms)
 
 
-text_symptoms = st.text_area(
-    "Or describe your symptoms in your own words (optional):",
-    placeholder="Mention your another symptoms"
-)
+text_symptoms = st.text_area(":", placeholder="Mention your another symptoms")
     #translator
 response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -200,23 +197,35 @@ except:
 
 # Prediction button
 if st.button("Predict Disease"):
+    # Validate: both fields can't be empty
     if not selected_symptoms and not text_symptoms.strip():
         st.warning("⚠️ Please either select symptoms from the list or describe them in the text box.")
     else:
-        # Only call translation if text_symptoms is not empty
+        # Process translation only if text_symptoms is provided
         a = ""
         if text_symptoms.strip():
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[  
-                    {'role': 'system', 'content': 'You are the professional translator. Person will tell their symptoms. You have to convert them back to proper medical symptom names like "ulti" → "vomiting". Return only the translated string with a space at the end.'},
-                    {'role': 'user', 'content': text_symptoms},  
-                    {'role': 'assistant', 'content': 'Only translate relevant symptoms. Ignore unrelated text. If input is empty, do nothing.'},
-                ]
-            )
-            a = response.choices[0].message.content
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {'role': 'system', 'content': 'You are the professional translator. Person will tell their symptoms. You have to convert them back to proper medical symptom names like "ulti" → "vomiting". Return only the translated string with a space at the end.'},
+                        {'role': 'user', 'content': text_symptoms},
+                        {'role': 'assistant', 'content': 'Only translate relevant symptoms. Ignore unrelated text. If input is empty, do nothing.'},
+                    ]
+                )
+                a = response.choices[0].message.content.strip()
+            except Exception as e:
+                st.error("Translation failed. Please try again.")
+                st.stop()
 
-        final_response = a + ",".join(selected_symptoms)
+        # Combine selected + translated symptoms
+        b = ",".join(selected_symptoms).strip()
+        final_response = ",".join(filter(None, [a, b]))  # skip empty parts
+
+        # If still empty, show warning
+        if not final_response.strip():
+            st.warning("❗ Your input didn't contain any recognizable symptoms. Please try again.")
+            st.stop()
 
     if model_works:
         try:
